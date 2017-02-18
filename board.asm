@@ -8,90 +8,101 @@ delay: MACRO
     ldx  #$0F
 \@loop:
     call readButton
-    dbne x,\@loop
+    dbne x, \@loop
     pulx
     ENDM
 
 ;------------------------------------------
 ; Board Display
 ;------------------------------------------
-		XDEF board,gameWon,gameLost
-		XREF maze,lose,win
-		XREF PORTA,PORTB
-		XREF prow,pcol,pdisp
-		XREF initPlayer,decPlayer,movePlayer
-		XREF readButton
+XDEF board, gameWon, gameLost
+XREF maze, lose, win
+XREF PORTA, PORTB
+XREF prow, pcol, pdisp
+XREF initPlayer, decPlayer, movePlayer
+XREF readButton
+
 BoardCode: SECTION
 
 board:
-    call initPlayer ; initialize player
-gameLoop:    
+    ; initialize player
+    call initPlayer 
+gameLoop:
+    ; display 8 rows
     ldx  #maze
-    ldy  #8 ; display 8 rows
+    ldy  #8 
     movb #1,row  
-    
-display:       ; first check if player is in current row
+ 
+ ; first check if player is in current row
+display:
     ldaa prow
     cmpa row
     bne  displayBoard
-    
-displayPlayer: ; then check if player should be displayed
+
+; then check if player should be displayed
+displayPlayer: 
+    ; if 0, branch to playerOff
     tst  pdisp
-    beq  playerOff  ; if 0, branch to playerOff
+    beq  playerOff 
+
 playerOn:
-    movb pcol,PORTA
-    movb prow,PORTB
+    movb pcol, PORTA
+    movb prow, PORTB
     delay
+
 playerOff:
     call decPlayer
     
 displayBoard:
-    movb 1,X+,PORTA
-    movb row,PORTB
+    movb 1, X+, PORTA
+    movb row, PORTB
     delay
-    
-    ldab row  ; shift row over then repeat
+    ; shift row over then repeat
+    ldab row  
     aslb
     stab row
     
     call movePlayer
     
-    dbne Y,display
+    dbne Y, display
     bra  gameLoop    
-		swi
+    swi
+
 
 
 gameWon:
-    ldx #win
-    ldy #8
+    ldx  #win
+    ldy  #8
     movb #1,row
+
 displayWon:    
-    movb 1,X+,PORTA
-    movb row,PORTB
+    movb 1, X+, PORTA
+    movb row, PORTB
     delay
-    
-    ldab row  ; shift row over then repeat
+    ; shift row over then repeat
+    ldab row  
     aslb
     stab row
     
-    dbne Y,displayWon
+    dbne Y, displayWon
     bra  gameWon  
     
     
 gameLost:
-    ldx #lose
-    ldy #8
+    ldx  #lose
+    ldy  #8
     movb #1,row
+
 displayLost:    
-    movb 1,X+,PORTA
-    movb row,PORTB
+    movb 1, X+, PORTA
+    movb row, PORTB
     delay
-    
-    ldab row  ; shift row over then repeat
+     ; shift row over then repeat
+    ldab row 
     aslb
     stab row
     
-    dbne Y,displayLost
+    dbne Y, displayLost
     bra  gameLost  
 
 ;------------------------------------------
